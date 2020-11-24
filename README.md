@@ -3,10 +3,19 @@
 RL starter files in order to immediatly train, visualize and evaluate an agent **without writing any line of code**.
 
 <p align="center">
-    <img width="300" src="README-rsrc/visualize-keycorridor.gif">
+    <img width="300" src="README-rsrc/visualize-keycorridor.gif" alt=""/>
 </p>
 
-These files are suited for [`gym-minigrid`](https://github.com/maximecb/gym-minigrid) environments and [`torch-ac`](https://github.com/lcswillems/torch-ac) RL algorithms. They are easy to adapt to other environments and RL algorithms.
+<p align="center">
+    <img width="300" src="/Users/ccall/Documents/minigrid_torch/README-rsrc/visualize-keycorridor.gif"/>
+</p>
+
+![image info](README-rsrc/visualize-keycorridor.gif)
+
+
+These files are suited for [`gym-minigrid`](https://github.com/maximecb/gym-minigrid) environments 
+and [`torch-ac`](https://github.com/lcswillems/torch-ac) RL algorithms. 
+They are easy to adapt to other environments and RL algorithms.
 
 ## Features
 
@@ -22,7 +31,99 @@ These files are suited for [`gym-minigrid`](https://github.com/maximecb/gym-mini
   - Act by sampling or argmax
   - List the worst performed episodes
 
-## Installation
+## Installation cdc
+NOTE: python > 3.7.7 is a problem
+#### 1. Create a conda environment  
+```
+conda create -n minigrid python=3.7.7 
+conda activate minigrid
+```
+    
+#### 2. Clone this repository
+```
+git clone https://github.com/drucej/minigrid_torch.git
+git checkout ccall_dev
+```
+
+#### 3. Install mini-grid and dependencies
+```
+cd <path-to>minigrid_torch/gym_minigrid
+pip install -e .
+```
+
+#### 4. Install RL sandbox (depends on local mini-grid)
+```
+cd <path-to>minigrid_torch
+pip install -e .
+```
+
+## Create Docker image cdc
+
+#### 1. Create docker image (dockerfile at top level) 
+```
+(docker system prune -a --volumes) or equivalent
+docker build -t rl_sandbox
+```
+
+#### 2. Run docker image (note jupyter is serving on port 8889)
+```
+docker run -p 6006:6006 -p 8889:8889 --rm -it --name rl_sandbox rl_sandbox:latest
+```
+
+This will return a prompt: `root@f553584171ae:/home/rl_sandbox# `  
+showing you are running as root in the rl_sandbox home directory  
+You can run as the rl_sandbox user:
+```
+su rl_sandbox
+```
+This will return a prompt: `$`  
+Currently, the sandbox user's account isn't properly set up so tab completions, etc. are disabled.
+
+####3. Set up data (needed by the example Jupyter Notebook)
+In a new terminal, run
+```
+python -m scripts.train --algo ppo --env MiniGrid-DoorKey-6x6-v0 --model DoorKey6 --save-interval 10 --frames 80000
+```
+
+#### 3. Run Jupyter 
+
+ #####Run as root
+```
+docker exec -it rl_sandbox bash
+jupyter notebook --ip=0.0.0.0 --allow-root
+```
+
+#####Run as rl_sandbox user
+```
+su rl_sandbox
+docker exec -it rl_sandbox bash
+jupyter notebook --ip=0.0.0.0 
+```
+   
+you can now log in to Jupyter via your browser using the token '1234'
+   ```
+   localhost:8889/?token=1234
+   ```
+
+#### 4. Run Tensorboard
+In a new terminal (home directory is /home/rl_sandbox)  
+```
+docker exec -it rl_sandbox bash
+tensorboard --logdir=storage/tensorboard --bind_all
+```
+you can now access Tensorboard via your browser 
+   ```
+   localhost:6006
+   ```
+
+#### 5. Stopping and Exiting Applications
+
+Both Jupyter and Tensorboard servers are stopped with `^c`  (control c)   
+In each case, you then need to exit the bash shell with `exit`  
+You also exit the Docker shell with `exit`
+
+
+## Installation jd
 
 1. Clone this repository.
 
@@ -48,7 +149,7 @@ Train, visualize and evaluate an agent on the `MiniGrid-DoorKey-5x5-v0` environm
 1. Train the agent on the `MiniGrid-DoorKey-5x5-v0` environment with PPO algorithm:
 
 ```
-python3 -m scripts.train --algo ppo --env MiniGrid-DoorKey-5x5-v0 --model DoorKey --save-interval 10 --frames 80000
+python -m scripts.train --algo ppo --env MiniGrid-DoorKey-5x5-v0 --model DoorKey --save-interval 10 --frames 80000
 ```
 
 <p align="center"><img src="README-rsrc/train-terminal-logs.png"></p>
